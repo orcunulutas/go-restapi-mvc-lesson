@@ -1,55 +1,48 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
+	"flag"
+	"go-restapi/controllers"
+	"go-restapi/database"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 )
 
-type application struct {
-	Port   string
-	Domain string
-}
-
-func (app *application) Home(w http.ResponseWriter, r *http.Request) {
-	var payloud = struct {
-		Status  string `json:"status"`
-		Message string `json:"message"`
-	}{
-		Status:  "True",
-		Message: "Golang RestApi",
-	}
-
-	jsonByte, err := json.Marshal(payloud)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonByte)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-}
+// go run main.go -host=localhost -port=5432 -user=your_username -pass=your_password -dbname=your_database_name -sslmode=disable -timezone=Europe/Istanbul -connect_timeout=5
 
 func main() {
-	var app application
-	app.Port = ":8080"
+	var settings database.DatabaseSettings
 
-	mux := chi.NewRouter()
-	mux.Get("/", app.Home)
+	host := flag.String("host", "localhost", "Host for database conn")
+	port := flag.String("port", "5432", "port for db")
+	user := flag.String("user", "postgres", "Username for database connection")
+	pass := flag.String("pass", "postgres", "Password for database connection")
+	dbname := flag.String("dbname", "tasks", "Database name for connection")
+	sslmode := flag.String("sslmode", "disable", "SSL mode for database connection")
+	timezone := flag.String("timezone", "Default", "Timezone for database connection")
+	connectTimeout := flag.String("connect_timeout", "5", "Connect timeout for database connection")
+	flag.Parse()
 
-	fmt.Println("Starting application on port ", app.Port)
-	err := http.ListenAndServe(app.Port, mux)
+	settings = database.DatabaseSettings{
+		Host:              *host,
+		Port:              *port,
+		User:              *user,
+		Dbname:            *dbname,
+		Pass:              *pass,
+		Sslmode:           *sslmode,
+		Timezone:          *timezone,
+		ConnectionTimeout: *connectTimeout,
+	}
+	dsn := database.GenerateDSN(settings)
+
+	r := gin.Default()
+
+	_, err := database.ConnectDatabase(dsn)
 	if err != nil {
 		panic(err)
 	}
+
+	r.GET("/tasks", controllers.GetAllTasks)
+	r.Run(":8080")
 
 }

@@ -24,7 +24,7 @@ CREATE TABLE public.tasks (
 
 
 ALTER TABLE public.tasks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.genres_id_seq
+    SEQUENCE NAME public.tasks_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -57,10 +57,10 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 );
 
 
-COPY public.genres (id, genre, created_at, updated_at) FROM stdin;
-1	task1   market  2022-09-23 00:00:00	2022-09-23 00:00:00
-2	task2   kitapOku    2022-09-23 00:00:00	2022-09-23 00:00:00
-3	task3   tadilat 2022-09-23 00:00:00	2022-09-23 00:00:00
+COPY public.tasks (id, title, description, created_at, updated_at) FROM stdin;
+1	task1	market	2022-09-23 00:00:00	2022-09-23 00:00:00
+2	task2	kitapOku	2022-09-23 00:00:00	2022-09-23 00:00:00
+3	task3	tadilat	2022-09-23 00:00:00	2022-09-23 00:00:00
 \.
 
 COPY public.users (id, first_name, last_name, email, password, created_at, updated_at) FROM stdin;
@@ -70,5 +70,5 @@ COPY public.users (id, first_name, last_name, email, password, created_at, updat
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY public.usertaskss
+ALTER TABLE ONLY public.usertasks
     ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
